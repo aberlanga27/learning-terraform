@@ -33,17 +33,17 @@ module "blog_vpc" {
   }
 }
 
-resource "aws_instance" "blog" {
-  ami           = data.aws_ami.app_ami.id
-  instance_type = var.instance_type
-  vpc_security_group_ids = [module.blog_security_group.security_group_id]
+# resource "aws_instance" "blog" {
+#   ami           = data.aws_ami.app_ami.id
+#   instance_type = var.instance_type
+#   vpc_security_group_ids = [module.blog_security_group.security_group_id]
 
-  subnet_id = module.blog_vpc.public_subnets[0]
+#   subnet_id = module.blog_vpc.public_subnets[0]
 
-  tags = {
-    Name = "HelloWorld"
-  }
-}
+#   tags = {
+#     Name = "HelloWorld"
+#   }
+# }
 
 module "blog_security_group" {
   source  = "terraform-aws-modules/security-group/aws"
@@ -58,6 +58,26 @@ module "blog_security_group" {
 
   egress_rules  = ["all-all"]
   egress_cidr_blocks = ["0.0.0.0/0"]
+}
+
+module "blog_autoscaling" {
+  source  = "terraform-aws-modules/autoscaling/aws"
+  version = "8.3.0"
+
+  name = "blog-asg"
+  min_size = 1
+  max_size = 2
+
+  vpc_zone_identifier = module.blog_vpc.public_subnets
+  security_groups = [module.blog_security_group.security_group_id]
+  
+  image_id = data.aws_ami.app_ami.id
+  instance_type = var.instance_type
+}
+
+resource "aws_autoscaling_attachment" "blog_asg_alb" {
+  autoscaling_group_name = module.blog_autoscaling.autoscaling_group_name
+  lb_target_group_arn    = module.blog_load_balancer.target_groups["ex-instance"].arn
 }
 
 module "blog_load_balancer" {
@@ -76,7 +96,7 @@ module "blog_load_balancer" {
       protocol         = "HTTP"
       port             = 80
       target_type      = "instance"
-      target_id        = aws_instance.blog.id
+      target_id        = module.blog_autoscaling.autoscaling_group_name
     }
   }
 
