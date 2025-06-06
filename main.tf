@@ -78,7 +78,7 @@ module "blog_autoscaling" {
 
   launch_template_id      = aws_launch_template.blog_launch_template.id
   launch_template_name    = aws_launch_template.blog_launch_template.name
-  launch_template_version = aws_launch_template.blog_launch_template.latest_version
+  launch_template_version = "$Latest"
   launch_template_tags = {
     Environment = "dev"
   }
