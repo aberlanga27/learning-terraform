@@ -75,8 +75,9 @@ module "blog_autoscaling" {
 
   vpc_zone_identifier = module.blog_vpc.public_subnets
   security_groups = [module.blog_security_group.security_group_id]
-  
-  launch_template_id = aws_launch_template.blog_launch_template.id
+
+  launch_template_id      = aws_launch_template.blog_launch_template.id
+  launch_template_version = "$Latest"
 }
 
 module "blog_load_balancer" {
