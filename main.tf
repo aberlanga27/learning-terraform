@@ -51,7 +51,7 @@ module "blog_security_group" {
 resource "aws_launch_template" "blog_launch_template" {
   name_prefix   = "blog-launch-template-"
   image_id      = data.aws_ami.app_ami.id
-  instance_type = "t3.micro"
+  instance_type = var.instance_type
 
   vpc_security_group_ids = [module.blog_security_group.security_group_id]
 
