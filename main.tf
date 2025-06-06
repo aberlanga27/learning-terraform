@@ -76,6 +76,7 @@ module "blog_autoscaling" {
   vpc_zone_identifier = module.blog_vpc.public_subnets
   security_groups = [module.blog_security_group.security_group_id]
 
+  instance_type = var.instance_type
   launch_template_id      = aws_launch_template.blog_launch_template.id
   launch_template_version = "$Latest"
 }
